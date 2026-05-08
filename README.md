@@ -102,3 +102,55 @@ The Event Management & Ticketing System is a backend application designed to hel
 ├── events.test.js
 └── orders.test.js
 ```
+
+## Security
+
+- Passwords hashed with bcrypt
+- All secrets stored in environment variables
+- Session-based authentication with 7-day expiration
+- HTTPS enforced in production
+- Request payload size limits
+- Rate limiting middleware support
+- CORS explicitly configured
+
+### Success Response
+
+```json
+{
+  "status": "success",
+  "message": "Human-readable message",
+  "code": "MACHINE_READABLE_CODE",
+  "data": {},
+  "meta": {}
+}
+```
+
+### Error Response
+
+```json
+{
+  "status": "error",
+  "message": "Human-readable error message",
+  "code": "MACHINE_READABLE_ERROR_CODE",
+  "errors": []
+}
+```
+
+### HTTP Status Codes
+
+| Code | Meaning               |
+| ---- | --------------------- |
+| 200  | OK                    |
+| 201  | Created               |
+| 204  | No Content            |
+| 400  | Bad Request           |
+| 401  | Unauthenticated       |
+| 403  | Forbidden             |
+| 404  | Not Found             |
+| 409  | Conflict              |
+| 422  | Unprocessable Entity  |
+| 500  | Internal Server Error |
+
+## Contact
+
+For issues or questions, please reach out to the administrators.
