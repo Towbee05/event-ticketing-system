@@ -33,12 +33,12 @@ The Event Management & Ticketing System is a backend application designed to hel
 
 1. Clone this repo
 
-`bash
+```bash
 git clone git@github.com:Towbee05/event-ticketing-system.git
 cd event-ticketing-system
 cp .env.example .env
 npm run dev
-`
+```
 
 ## Project Structure
 
