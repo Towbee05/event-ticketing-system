@@ -22,6 +22,24 @@ The Event Management & Ticketing System is a backend application designed to hel
 4. **LOGGING**: Winston
 5. **MIGRATIONS**: Moongoose
 
+## Getting started
+
+### Prerequisite:
+
+1. Node js is installed.
+2. A code editor is installed.
+
+### To run
+
+1. Clone this repo
+
+`
+git clone git@github.com:Towbee05/event-ticketing-system.git
+cd event-ticketing-system
+cp .env.example .env
+npm run dev
+`
+
 ## Project Structure
 
 ```
