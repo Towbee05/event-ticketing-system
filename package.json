@@ -16,6 +16,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "swagger": "node ./config/swagger.js",
     "dev": "nodemon app.js"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "express": "^5.2.1",
     "mongoose": "^9.6.2",
     "nodemon": "^3.1.14",
+    "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   }
