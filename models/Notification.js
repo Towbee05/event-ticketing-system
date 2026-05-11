@@ -1,24 +1,3 @@
-// {
-//   _id: ObjectId,
-
-//   user: {
-//     type: ObjectId,
-//     ref: "User"
-//   },
-
-//   title: String,
-
-//   message: String,
-
-//   isRead: {
-//     type: Boolean,
-//     default: false
-//   },
-
-//   createdAt: Date,
-//   updatedAt: Date
-// }
-
 const mongoose = require("mongoose");
 
 const NotificationSchema = new mongoose.Schema(
