@@ -33,7 +33,7 @@ const EventSchema = new mongoose.Schema(
       type: String,
       required: [true, "please provide a venue for the event"],
     },
-    catgory: {
+    category: {
       type: String,
     },
     bannerImage: {
@@ -41,6 +41,11 @@ const EventSchema = new mongoose.Schema(
     },
     status: {
       type: String,
+      enum: {
+        values: ["draft", "published", "cancelled"],
+        message: "status must be draft, published, or cancelled",
+      },
+      default: "draft",
     },
   },
   {

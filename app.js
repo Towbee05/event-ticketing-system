@@ -3,13 +3,18 @@ const dotenv = require("dotenv");
 const db = require("./config/db");
 const swaggerUI = require("swagger-ui-express");
 const swaggerFile = require("./swagger-out.json");
+const eventRoutes = require("./routes/eventRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 
 dotenv.config();
 const app = express();
 // swagger docs is configured to run on port 5000
 const PORT = process.env.PORT || 5000;
 
+app.use(express.json());
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerFile));
+app.use("/api/events", eventRoutes);
+app.use("/api/categories", categoryRoutes);
 
 const server = app.listen(PORT, async () => {
   try {
