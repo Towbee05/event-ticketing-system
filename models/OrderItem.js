@@ -5,10 +5,12 @@ const OrderItemSchema = new mongoose.Schema(
     order: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: "Order",
+      required: [true, "please provide an order for the order item"],
     },
     ticket: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: "Ticket",
+      required: [true, "please provide a ticket for the order item"],
     },
     quantity: {
       type: Number,
@@ -22,8 +24,6 @@ const OrderItemSchema = new mongoose.Schema(
     },
     subTotal: {
       type: Number,
-      required: [true, "please provide a subtotal for order item"],
-      min: [0, "Quantity must be greater or equal to zero"],
     },
   },
   {

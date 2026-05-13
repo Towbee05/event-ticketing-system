@@ -10,7 +10,7 @@ const TicketSchema = new mongoose.Schema(
     ticketType: {
       type: String,
       enum: {
-        values: ["early-bird", "regular", "vip-ticket"],
+        values: ["early-bird", "regular", "vip"],
         message: "{VALUE} is not supported",
       },
     },
