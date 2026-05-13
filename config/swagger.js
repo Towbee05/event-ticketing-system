@@ -2,6 +2,8 @@ const swagger = require("swagger-autogen")();
 const dotenv = require("dotenv");
 dotenv.config();
 
+const port = process.env.PORT || 3000;
+
 const docs = {
   info: {
     version: "v1.0",
@@ -9,12 +11,12 @@ const docs = {
     description:
       "This API docs is for an event management and ticketing system, which handles event booking, browsing of events, purchase of tickets, and so on.",
   },
-  host: `localhost:${process.env.PORT}`,
+  host: `localhost:${port}`,
   basePath: "/",
   schemes: ["http", "https"],
 };
 
 const outFile = "../swagger-out.json";
-const endpointsFile = ["../app.js", "../routes/eventRoutes.js", "../routes/categoryRoutes.js"];
+const endpointsFile = ["../app.js"];
 
 swagger(outFile, endpointsFile, docs);

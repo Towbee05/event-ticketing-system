@@ -17,7 +17,7 @@ app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerFile));
 // Dynamically load all routes from ./routes/*.js
 const routesPath = path.join(__dirname, "routes");
 fs.readdirSync(routesPath).forEach((file) => {
-  if (file.endsWith(".js")) {
+  if (file.endsWith("Routes.js")) {
     const routeName = file.replace("Routes.js", "").toLowerCase();
     const routeModule = require(`./routes/${file}`);
     app.use(`/api/${routeName}s`, routeModule);
