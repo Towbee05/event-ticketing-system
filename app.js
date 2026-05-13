@@ -1,10 +1,10 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const fs = require("fs");
+const path = require("path");
 const db = require("./config/db");
 const swaggerUI = require("swagger-ui-express");
 const swaggerFile = require("./swagger-out.json");
-const eventRoutes = require("./routes/eventRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
 
 dotenv.config();
 const app = express();
@@ -13,8 +13,16 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerFile));
-app.use("/api/events", eventRoutes);
-app.use("/api/categories", categoryRoutes);
+
+// Dynamically load all routes from ./routes/*.js
+const routesPath = path.join(__dirname, "routes");
+fs.readdirSync(routesPath).forEach((file) => {
+  if (file.endsWith(".js")) {
+    const routeName = file.replace("Routes.js", "").toLowerCase();
+    const routeModule = require(`./routes/${file}`);
+    app.use(`/api/${routeName}s`, routeModule);
+  }
+});
 
 const server = app.listen(PORT, async () => {
   try {

@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
     const category = await Category.create(req.body);
     res.status(201).json({ success: true, data: category });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -48,7 +48,7 @@ router.put("/:id", async (req, res) => {
     }
     res.status(200).json({ success: true, data: category });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
