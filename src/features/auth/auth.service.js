@@ -3,25 +3,23 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const User = require("../users/user.model");
 
+// Generate JWT token
 const generateToken = (userId, role) => {
   return jwt.sign({ id: userId, role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
 
-const registerUser = async (data) => {
-  const { name, email, password, role } = data;
-
+// Shared registration logic
+const registerWithRole = async (data, role) => {
+  const { name, email, password } = data;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     throw new Error("Email is already registered");
   }
 
- 
   const user = await User.create({ name, email, password, role });
-
- 
   const token = generateToken(user._id, user.role);
 
   return {
@@ -35,7 +33,19 @@ const registerUser = async (data) => {
   };
 };
 
+const registerAttendee = async (data) => {
+  return await registerWithRole(data, "attendee");
+};
 
+const registerOrganizer = async (data) => {
+  return await registerWithRole(data, "organizer");
+};
+
+const registerAdmin = async (data) => {
+  return await registerWithRole(data, "admin");
+};
+
+// Forgot password
 const forgotPassword = async (email) => {
   const user = await User.findOne({ email });
   if (!user) {
@@ -44,16 +54,14 @@ const forgotPassword = async (email) => {
 
   const resetToken = crypto.randomBytes(32).toString("hex");
 
-  
   user.resetPasswordToken = crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
 
-  user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+  user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
   await user.save({ validateBeforeSave: false });
 
- 
   const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
   const transporter = nodemailer.createTransport({
@@ -84,6 +92,8 @@ const forgotPassword = async (email) => {
 };
 
 module.exports = {
-  registerUser,
+  registerAttendee,
+  registerOrganizer,
+  registerAdmin,
   forgotPassword,
 };
