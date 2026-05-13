@@ -64,14 +64,18 @@ const forgotPassword = async (email) => {
 
   const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+ const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 
   const mailOptions = {
     from: `"Event Ticketing" <${process.env.EMAIL_USER}>`,
