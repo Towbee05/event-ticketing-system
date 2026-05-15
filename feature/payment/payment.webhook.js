@@ -1,8 +1,8 @@
-import express from "express";
-import crypto from "crypto";
+const express = require("express");
+const crypto = require("crypto");
 
-import Payment from "./payment.model.js";
-// import Order from "../order/order.model";
+const Payment = require("./payment.model.js");
+// const Order = require("../order/order.model");
 
 const router = express.Router();
 
@@ -81,4 +81,4 @@ router.post(
   },
 );
 
-export default router;
+module.exports = router;

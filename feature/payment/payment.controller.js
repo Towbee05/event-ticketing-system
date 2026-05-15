@@ -1,16 +1,16 @@
-import asyncHandler from "../../shared/asynHandler.js";
-import {
+const asyncHandler = require("../../shared/asynHandler.js");
+const {
   initializePaymentService,
   verifyPaymentService,
-} from "./payment.service.js";
+} = require("./payment.service.js");
 
-import {
+const {
   initializePaymentSchema,
   verifyPaymentSchema,
-} from "./payment.validation.js";
+} = require("./payment.validation.js");
 
 // Initialize Payment
-export const initializePayment = asyncHandler(async (req, res) => {
+const initializePayment = asyncHandler(async (req, res) => {
   const { error } = initializePaymentSchema.validate(req.body);
 
   if (error) {
@@ -33,7 +33,7 @@ export const initializePayment = asyncHandler(async (req, res) => {
 });
 
 // Verify Payment
-export const verifyPayment = asyncHandler(async (req, res) => {
+const verifyPayment = asyncHandler(async (req, res) => {
   const { error } = verifyPaymentSchema.validate(req.body);
 
   if (error) {
@@ -54,3 +54,8 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     data: payment,
   });
 });
+
+module.exports = {
+  initializePayment,
+  verifyPayment,
+};

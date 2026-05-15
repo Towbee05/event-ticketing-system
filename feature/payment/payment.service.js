@@ -1,10 +1,10 @@
-import axios from "axios";
-import Payment from "./payment.model.js";
-// import Order from "../order/order.model.js"; 
+const axios = require("axios");
+const Payment = require("./payment.model.js");
+// const Order = require("../order/order.model.js");
 // // order has not been created yet, so we will comment this out for now
 
 // initialize payment service for a given order and user
-export const initializePaymentService = async (orderId, user) => {
+const initializePaymentService = async (orderId, user) => {
   //  find the order by id and ensure it belongs to the user
   const order = await Order.findOne({ _id: orderId, user: user._id });
 
@@ -51,7 +51,7 @@ export const initializePaymentService = async (orderId, user) => {
 };
 
 // verify payment after user completes the transaction
-export const verifyPaymentService = async (reference) => {
+const verifyPaymentService = async (reference) => {
   //   find payment
   const payment = await Payment.findOne({ reference });
 
@@ -95,4 +95,9 @@ export const verifyPaymentService = async (reference) => {
   }
 
   return payment;
+};
+
+module.exports = {
+  initializePaymentService,
+  verifyPaymentService,
 };
