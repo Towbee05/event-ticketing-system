@@ -26,17 +26,29 @@ app.use((req, res) => {
   });
 });
 
+app.use((err, req, res, next) => {
+  const status = err.statusCode || 500;
+  res.status(status).json({
+    success: false,
+    message: err.message || "Internal server error",
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, async () => {
+const bootstrap = async () => {
   try {
     console.log("Connecting to db...");
     await db.connectDB(process.env.MONGO_URI);
     console.log("Successful connection to db.");
-    console.log("Server started successfully");
+    app.listen(PORT, () => {
+      console.log("Server started successfully");
+    });
   } catch (err) {
     console.log("An error occured while starting server");
     console.log(err);
     process.exit(1);
   }
-});
+};
+
+bootstrap();

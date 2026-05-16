@@ -3,14 +3,14 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const User = require("../users/user.model");
 
-// Generate JWT token
+
 const generateToken = (userId, role) => {
   return jwt.sign({ id: userId, role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
 
-// Shared registration logic
+
 const registerWithRole = async (data, role) => {
   const { name, email, password } = data;
 
@@ -49,8 +49,10 @@ const registerAdmin = async (data) => {
 const forgotPassword = async (email) => {
   const user = await User.findOne({ email });
   if (!user) {
-    throw new Error("No account found with that email");
+    return { message: "If an account exists for that email, a reset link has been sent" };
   }
+  return  { message: "If an account exists for that email, a reset link has been sent" };
+},
 
   const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -72,9 +74,6 @@ const forgotPassword = async (email) => {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  tls: {
-    rejectUnauthorized: false,
-  },
 });
 
   const mailOptions = {
@@ -93,7 +92,7 @@ const forgotPassword = async (email) => {
   await transporter.sendMail(mailOptions);
 
   return { message: "Password reset link sent to your email" };
-};
+
 
 module.exports = {
   registerAttendee,

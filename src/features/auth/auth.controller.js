@@ -1,7 +1,4 @@
-const { validationResult } = require("express-validator");
-const authService = require("./auth.service");
-
-const registerAttendee = async (req, res) => {
+const registerAttendee = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -17,14 +14,14 @@ const registerAttendee = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    if (error.message === "Email is already registered") {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    next(error);
   }
 };
 
-const registerOrganizer = async (req, res) => {
+const registerOrganizer = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -40,14 +37,14 @@ const registerOrganizer = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    if (error.message === "Email is already registered") {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    next(error);
   }
 };
 
-const registerAdmin = async (req, res) => {
+const registerAdmin = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -63,14 +60,14 @@ const registerAdmin = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    if (error.message === "Email is already registered") {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    next(error);
   }
 };
 
-const forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -85,10 +82,7 @@ const forgotPassword = async (req, res) => {
       message: result.message,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
