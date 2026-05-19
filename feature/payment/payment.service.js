@@ -1,7 +1,13 @@
 const axios = require("axios");
 const Payment = require("./payment.model.js");
+
+const {
+  sendPaymentSuccessNotification,
+  sendPaymentFailureNotification,
+} = require("../notifications/notification.service.js");
+
 // const Order = require("../order/order.model.js");
-// // order has not been created yet, so we will comment this out for now
+// order has not been created yet, so we will comment this out for now
 
 // initialize payment service for a given order and user
 const initializePaymentService = async (orderId, user) => {
@@ -33,27 +39,29 @@ const initializePaymentService = async (orderId, user) => {
     },
   );
 
-  const { data } = response.data.data;
+  const paystackData = response.data.data;
 
   //   save payment details
   const payment = await Payment.create({
     order: order._id,
     user: user._id,
     amount: order.totalAmount,
-    reference: data.reference,
+    reference: paystackData.reference,
     status: "pending",
   });
 
   return {
-    paymentUrl: data.authorization_url,
-    reference: data.reference,
+    paymentUrl: paystackData.authorization_url,
+    reference: paystackData.reference,
   };
 };
 
 // verify payment after user completes the transaction
 const verifyPaymentService = async (reference) => {
   //   find payment
-  const payment = await Payment.findOne({ reference });
+  const payment = await Payment.findOne({ reference })
+    .populate("user")
+    .populate("order");
 
   if (!payment) {
     throw new Error("Payment not found");
@@ -74,10 +82,12 @@ const verifyPaymentService = async (reference) => {
     },
   );
 
-  const { data } = response.data.data;
+  const paystackData = response.data.data;
+
+  const user = payment.user;
 
   //   if payment is successful, update payment and order status
-  if (data.status === "success") {
+  if (paystackData.status === "success") {
     payment.status = "successful";
     payment.paidAt = new Date();
 
@@ -92,6 +102,17 @@ const verifyPaymentService = async (reference) => {
 
       await order.save();
     }
+
+    console.log("🔔 Triggering notification...");
+
+    // send success notification
+    await sendPaymentSuccessNotification(user, payment);
+  } else {
+    // send failure notification
+    payment.status = "failed";
+    await payment.save();
+
+    await sendPaymentFailureNotification(user, payment);
   }
 
   return payment;
