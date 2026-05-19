@@ -1,16 +1,24 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
 const db = require("./config/db");
 const authRoute = require("./src/features/auth/auth.route");
+const paymentRoutes = require("./feature/payment/payment.route.js");
+const errorMiddleware = require("./middleware/error.middleware.js");
 
 dotenv.config();
 
 const app = express();
 
+
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 app.use("/api/auth", authRoute);
+app.use("/api/payments", paymentRoutes);
+
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -26,13 +34,7 @@ app.use((req, res) => {
   });
 });
 
-app.use((err, req, res, next) => {
-  const status = err.statusCode || 500;
-  res.status(status).json({
-    success: false,
-    message: err.message || "Internal server error",
-  });
-});
+app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 5000;
 
