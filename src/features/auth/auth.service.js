@@ -1,0 +1,102 @@
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const User = require("../users/user.model");
+
+
+const generateToken = (userId, role) => {
+  return jwt.sign({ id: userId, role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
+
+
+const registerWithRole = async (data, role) => {
+  const { name, email, password } = data;
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new Error("Email is already registered");
+  }
+
+  const user = await User.create({ name, email, password, role });
+  const token = generateToken(user._id, user.role);
+
+  return {
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+  };
+};
+
+const registerAttendee = async (data) => {
+  return await registerWithRole(data, "attendee");
+};
+
+const registerOrganizer = async (data) => {
+  return await registerWithRole(data, "organizer");
+};
+
+const registerAdmin = async (data) => {
+  return await registerWithRole(data, "admin");
+};
+
+// Forgot password
+const forgotPassword = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    return { message: "If an account exists for that email, a reset link has been sent" };
+  }
+  return  { message: "If an account exists for that email, a reset link has been sent" };
+},
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  user.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+  await user.save({ validateBeforeSave: false });
+
+  const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+ const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+  const mailOptions = {
+    from: `"Event Ticketing" <${process.env.EMAIL_USER}>`,
+    to: user.email,
+    subject: "Password Reset Request",
+    html: `
+      <h2>Password Reset</h2>
+      <p>You requested a password reset. Click the link below to reset your password.</p>
+      <p>This link expires in <strong>15 minutes</strong>.</p>
+      <a href="${resetURL}" target="_blank">${resetURL}</a>
+      <p>If you did not request this, please ignore this email.</p>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+
+  return { message: "Password reset link sent to your email" };
+
+
+module.exports = {
+  registerAttendee,
+  registerOrganizer,
+  registerAdmin,
+  forgotPassword,
+};
