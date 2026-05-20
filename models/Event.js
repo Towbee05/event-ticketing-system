@@ -33,7 +33,7 @@ const EventSchema = new mongoose.Schema(
       type: String,
       required: [true, "please provide a venue for the event"],
     },
-    catgory: {
+    category: {
       type: String,
     },
     bannerImage: {

@@ -18,7 +18,7 @@ const OrderSchema = new mongoose.Schema(
     paymentStatus: {
       type: String,
       enum: {
-        value: ["pending", "paid", "failed"],
+        values: ["pending", "paid", "failed"],
         message: "{VALUE} is not supported",
       },
       default: "pending",
@@ -26,7 +26,7 @@ const OrderSchema = new mongoose.Schema(
     orderStatus: {
       type: String,
       enum: {
-        value: ["pending", "completed", "cancelled"],
+        values: ["pending", "completed", "cancelled"],
         message: "{VALUE} is not supported",
       },
       default: "pending",
@@ -37,4 +37,4 @@ const OrderSchema = new mongoose.Schema(
   },
 );
 
-module.export = mongoose.model("Order", OrderSchema);
+module.exports = mongoose.model("Order", OrderSchema);
