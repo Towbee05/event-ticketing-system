@@ -12,9 +12,22 @@ const docs = {
   host: `localhost:${process.env.PORT}`,
   basePath: "/",
   schemes: ["http", "https"],
+  tags: [
+    {
+      name: "Authentication",
+      description: "Endpoints for user authentication and token management",
+    },
+  ],
+  securityDefinitions: {
+    bearerAuth: {
+      type: "http",
+      scheme: "bearer",
+      bearerFormat: "JWT",
+    },
+  },
 };
 
 const outFile = "../swagger-out.json";
-const endpointsFile = ["../app.js", "../routes/eventRoutes.js", "../routes/categoryRoutes.js"];
+const endpointsFile = ["../app.js"];
 
 swagger(outFile, endpointsFile, docs);

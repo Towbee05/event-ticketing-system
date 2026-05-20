@@ -18,7 +18,7 @@ const PaymentSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        value: ["pending", "successful", "failed"],
+        values: ["pending", "successful", "failed"],
         message: "{VALUE} is not supported.",
       },
     },
