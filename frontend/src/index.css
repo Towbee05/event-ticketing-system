@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Surfaces — slightly warm off-white, easier on eyes than pure #fff */
+    --background: 240 20% 99%;
+    --foreground: 224 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 30% 12%;
+
+    /* Indigo primary (more energetic than the shadcn default near-black) */
+    --primary: 245 58% 51%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 30% 96%;
+    --secondary-foreground: 224 30% 18%;
+    --muted: 240 20% 96%;
+    --muted-foreground: 224 12% 45%;
+    --accent: 245 90% 96%;
+    --accent-foreground: 245 58% 35%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 240 20% 91%;
+    --input: 240 20% 91%;
+    --ring: 245 58% 51%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 14% 8%;
+    --foreground: 0 0% 98%;
+    --card: 240 14% 11%;
+    --card-foreground: 0 0% 98%;
+    --primary: 245 78% 70%;
+    --primary-foreground: 240 14% 8%;
+    --secondary: 240 8% 18%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 8% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 245 30% 22%;
+    --accent-foreground: 245 78% 90%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 152 60% 50%;
+    --success-foreground: 240 14% 8%;
+    --warning: 38 90% 60%;
+    --warning-foreground: 240 14% 8%;
+    --border: 240 6% 22%;
+    --input: 240 6% 22%;
+    --ring: 245 78% 70%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .bg-grid {
+    background-image: radial-gradient(circle at 1px 1px, hsl(var(--border)) 1px, transparent 0);
+    background-size: 32px 32px;
+  }
+  .bg-hero {
+    background-image:
+      radial-gradient(at 20% 0%, hsl(var(--accent)) 0%, transparent 50%),
+      radial-gradient(at 80% 50%, hsl(245 60% 92%) 0%, transparent 50%),
+      radial-gradient(at 30% 90%, hsl(280 60% 94%) 0%, transparent 50%);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.animate-skeleton { animation: skeleton-pulse 1.6s ease-in-out infinite; }
+
+@keyframes toast-in {
+  from { transform: translateY(8px) scale(0.98); opacity: 0; }
+  to   { transform: translateY(0)   scale(1);    opacity: 1; }
+}
+.animate-toast-in { animation: toast-in 0.18s ease-out; }
