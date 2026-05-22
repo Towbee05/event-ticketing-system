@@ -6,6 +6,7 @@ const AppError = require("../../pkg/utils/AppError");
 const paystack = require("../../pkg/utils/paystack");
 const notifications = require("../notifications/notification.service");
 const issuance = require("../tickets/issuance.service");
+const orderService = require("../orders/order.service");
 
 // Pulls a number out of a Mongo Decimal128 or a string.
 const toNumber = (v) => {
@@ -86,13 +87,16 @@ const verify = async ({ reference, user }) => {
   const payment = await Payment.findOne({ paymentReference: reference });
   if (!payment) throw new AppError("Payment not found", 404, "PAYMENT_NOT_FOUND");
 
-  const order = await Order.findById(payment.order);
+  let order = await Order.findById(payment.order);
   if (!order) throw new AppError("Order for this payment is missing", 404, "ORDER_NOT_FOUND");
   if (user) assertOrderForUser(order, user);
 
-  // Idempotent: if we've already recorded success, just return current state.
+  // Idempotent: if we've already recorded a terminal state, just return current state.
   if (payment.status === "successful" && order.paymentStatus === "paid") {
-    return { payment, order, alreadyVerified: true };
+    return { payment, order, alreadyVerified: true, succeeded: true };
+  }
+  if (payment.status === "failed") {
+    return { payment, order, alreadyVerified: true, succeeded: false };
   }
 
   let succeeded;
@@ -116,17 +120,21 @@ const verify = async ({ reference, user }) => {
   if (succeeded) {
     order.paymentStatus = "paid";
     order.orderStatus = "completed";
-  } else if (order.paymentStatus === "pending") {
-    order.paymentStatus = "failed";
-  }
-  await order.save();
-
-  // Issue the actual ticket codes once payment lands. Idempotent — safe on re-verify.
-  if (succeeded) {
+    await order.save();
+    // Issue the actual ticket codes once payment lands. Idempotent — safe on re-verify.
     try {
       await issuance.issueForOrder(order._id);
     } catch (e) {
       console.error("[payments] ticket issuance failed:", e.message);
+    }
+  } else {
+    // On failure, release the held seats so they can be resold, and cancel the
+    // order. Without this the seats would stay locked indefinitely.
+    try {
+      const updated = await orderService.releaseSeatsForOrder(order._id);
+      if (updated) order = updated;
+    } catch (e) {
+      console.error("[payments] seat release on failure failed:", e.message);
     }
   }
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 const dotenv = require("dotenv");
 const fs = require("fs");
 const path = require("path");
@@ -29,6 +30,24 @@ app.use(
 
 app.use(express.json());
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerFile));
+
+// Rate limit auth endpoints to slow brute-force on login/forgot-password.
+// 20 attempts per 15 min per IP is tight enough to deter while not blocking real users.
+// Disabled when NODE_ENV=test so tests don't trip it.
+if (process.env.NODE_ENV !== "test") {
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      success: false,
+      message: "Too many auth attempts — please wait 15 minutes",
+      code: "RATE_LIMITED",
+    },
+  });
+  app.use("/api/auth", authLimiter);
+}
 
 // Feature-based routes — picks up the first `*.route.js` inside each features/<name>/ folder.
 // Folder name (pluralised, as in features/tickets/) is the mount path. The route file inside

@@ -4,18 +4,46 @@ const AppError = require("../../pkg/utils/AppError");
 
 const EVENT_POPULATE = { path: "event", select: "title date venue status organizer" };
 
-const listTickets = ({ event } = {}) => {
+// Visibility rule for ticket types: only the event's organizer + admins see drafts.
+// Everyone else only sees tickets for published events.
+const canSeeUnpublished = (event, user) => {
+  if (!event) return false;
+  if (!user) return false;
+  if (user.role === "admin") return true;
+  return String(event.organizer) === String(user.id);
+};
+
+// Look up the event and decide whether the caller can see its tickets.
+// 404 (not 403) when hiding — we don't want to leak existence of draft events.
+const assertEventVisible = async (eventId, user) => {
+  const event = await Event.findById(eventId).select("status organizer");
+  if (!event) throw new AppError("Event not found", 404, "EVENT_NOT_FOUND");
+  if (event.status !== "published" && !canSeeUnpublished(event, user)) {
+    throw new AppError("Event not found", 404, "EVENT_NOT_FOUND");
+  }
+  return event;
+};
+
+const listTickets = ({ event, user } = {}) => {
+  // Bare /api/tickets (no event filter) is only useful internally — we restrict
+  // to admin at the route layer. With an event filter, scope it to that event.
   const filter = {};
   if (event) filter.event = event;
   return Ticket.find(filter).populate(EVENT_POPULATE);
 };
 
-const listTicketsForEvent = (eventId) =>
-  Ticket.find({ event: eventId }).populate(EVENT_POPULATE);
+const listTicketsForEvent = async (eventId, user) => {
+  await assertEventVisible(eventId, user);
+  return Ticket.find({ event: eventId }).populate(EVENT_POPULATE);
+};
 
-const getTicket = async (id) => {
+const getTicket = async (id, user) => {
   const ticket = await Ticket.findById(id).populate(EVENT_POPULATE);
   if (!ticket) throw new AppError("Ticket not found", 404, "TICKET_NOT_FOUND");
+  // ticket.event may be the populated doc or null — gate visibility.
+  if (ticket.event && ticket.event.status !== "published" && !canSeeUnpublished(ticket.event, user)) {
+    throw new AppError("Ticket not found", 404, "TICKET_NOT_FOUND");
+  }
   return ticket;
 };
 
@@ -65,9 +93,12 @@ const deleteTicket = async (id, user) => {
   await ticket.deleteOne();
 };
 
-const getAvailability = async (id) => {
-  const ticket = await Ticket.findById(id);
+const getAvailability = async (id, user) => {
+  const ticket = await Ticket.findById(id).populate({ path: "event", select: "status organizer" });
   if (!ticket) throw new AppError("Ticket not found", 404, "TICKET_NOT_FOUND");
+  if (ticket.event && ticket.event.status !== "published" && !canSeeUnpublished(ticket.event, user)) {
+    throw new AppError("Ticket not found", 404, "TICKET_NOT_FOUND");
+  }
   const now = new Date();
   const available = Math.max(0, ticket.quantity - ticket.sold);
   const onSale =

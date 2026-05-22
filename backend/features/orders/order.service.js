@@ -2,6 +2,7 @@ const Order = require("../../models/Order");
 const OrderItem = require("../../models/OrderItem");
 const Ticket = require("../../models/Tickets");
 const Event = require("../../models/Event");
+const IssuedTicket = require("../../models/IssuedTicket");
 const AppError = require("../../pkg/utils/AppError");
 const notifications = require("../notifications/notification.service");
 
@@ -177,13 +178,33 @@ const deleteOrder = async (orderId, user) => {
     throw new AppError("Only admins may delete orders", 403, "FORBIDDEN");
   }
 
+  // Release seats only if the order hasn't already been cancelled/refunded.
   if (order.orderStatus !== "cancelled") {
     const items = await OrderItem.find({ order: order._id });
     await releaseSeats(items);
   }
 
+  // Cascade: kill the issued tickets so their QR codes can never scan again.
+  await IssuedTicket.deleteMany({ order: order._id });
   await OrderItem.deleteMany({ order: order._id });
   await order.deleteOne();
+};
+
+// Public helper for the payments feature: when a payment fails, release any seats
+// the order was holding and mark the order cancelled. Idempotent — calling on an
+// already-cancelled order is a no-op.
+const releaseSeatsForOrder = async (orderId) => {
+  const order = await Order.findById(orderId);
+  if (!order) return null;
+  if (order.orderStatus === "cancelled") return order;
+
+  const items = await OrderItem.find({ order: order._id });
+  await releaseSeats(items);
+
+  order.orderStatus = "cancelled";
+  if (order.paymentStatus === "pending") order.paymentStatus = "failed";
+  await order.save();
+  return order;
 };
 
 module.exports = {
@@ -194,4 +215,5 @@ module.exports = {
   cancelOrder,
   completeOrder,
   deleteOrder,
+  releaseSeatsForOrder,
 };

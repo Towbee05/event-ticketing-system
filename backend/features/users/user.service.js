@@ -11,10 +11,17 @@ const updateMe = async (userId, updates) => {
   return sanitize(user);
 };
 
+// Escape special regex characters so a query like "(a+)+$" can't trigger
+// catastrophic backtracking (ReDoS). Treats the input as a literal substring.
+const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const listUsers = ({ role, q } = {}) => {
   const filter = {};
   if (role) filter.role = role;
-  if (q) filter.$or = [{ email: new RegExp(q, "i") }, { name: new RegExp(q, "i") }];
+  if (q) {
+    const safe = escapeRegex(q);
+    filter.$or = [{ email: new RegExp(safe, "i") }, { name: new RegExp(safe, "i") }];
+  }
   return User.find(filter).sort({ createdAt: -1 });
 };
 

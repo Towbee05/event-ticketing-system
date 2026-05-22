@@ -3,17 +3,17 @@ const { success } = require("../../pkg/utils/response");
 const ticketService = require("./ticket.service");
 
 const list = catchAsync(async (req, res) => {
-  const data = await ticketService.listTickets({ event: req.query.event });
+  const data = await ticketService.listTickets({ event: req.query.event, user: req.user });
   success(res, { data });
 });
 
 const listForEvent = catchAsync(async (req, res) => {
-  const data = await ticketService.listTicketsForEvent(req.params.eventId);
+  const data = await ticketService.listTicketsForEvent(req.params.eventId, req.user);
   success(res, { data });
 });
 
 const getOne = catchAsync(async (req, res) => {
-  const data = await ticketService.getTicket(req.params.id);
+  const data = await ticketService.getTicket(req.params.id, req.user);
   success(res, { data });
 });
 
@@ -33,7 +33,7 @@ const remove = catchAsync(async (req, res) => {
 });
 
 const availability = catchAsync(async (req, res) => {
-  const data = await ticketService.getAvailability(req.params.id);
+  const data = await ticketService.getAvailability(req.params.id, req.user);
   success(res, { data });
 });
 

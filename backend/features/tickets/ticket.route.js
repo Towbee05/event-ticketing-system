@@ -1,5 +1,5 @@
 const express = require("express");
-const { protect } = require("../../middleware/auth.middleware");
+const { protect, attachUser } = require("../../middleware/auth.middleware");
 const { restrictTo } = require("../../middleware/role.middleware");
 const controller = require("./ticket.controller");
 const issuanceController = require("./issuance.controller");
@@ -30,11 +30,14 @@ router.get(
 );
 
 // --- Ticket TYPES (e.g. early-bird/regular/VIP for an event) -------------
-// Public reads — attendees browse tickets before authenticating.
-router.get("/", controller.list);
-router.get("/event/:eventId", validateIdParam("eventId"), controller.listForEvent);
-router.get("/:id", validateIdParam("id"), controller.getOne);
-router.get("/:id/availability", validateIdParam("id"), controller.availability);
+// attachUser populates req.user when a Bearer token is sent so the service
+// can show drafts to the organizer who owns the event. Anon users only see
+// tickets for published events. The bare list is admin-only.
+
+router.get("/", protect, restrictTo("admin"), controller.list);
+router.get("/event/:eventId", attachUser, validateIdParam("eventId"), controller.listForEvent);
+router.get("/:id", attachUser, validateIdParam("id"), controller.getOne);
+router.get("/:id/availability", attachUser, validateIdParam("id"), controller.availability);
 
 // Mutations require organizer or admin.
 router.post("/", protect, restrictTo("organizer", "admin"), validateCreate, controller.create);

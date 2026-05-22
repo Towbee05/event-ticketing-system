@@ -1,4 +1,6 @@
 const Event = require("../../models/Event");
+const Ticket = require("../../models/Tickets");
+const IssuedTicket = require("../../models/IssuedTicket");
 const AppError = require("../../pkg/utils/AppError");
 
 const ORGANIZER_POPULATE = { path: "organizer", select: "name email" };
@@ -64,6 +66,20 @@ const remove = async (id, user) => {
   const event = await Event.findById(id);
   if (!event) throw new AppError("Event not found", 404, "EVENT_NOT_FOUND");
   assertCanManage(event, user);
+
+  // Refuse delete if any actual attendees exist — they have QR codes referencing
+  // this event. The organizer should cancel the event instead.
+  const hasIssued = await IssuedTicket.exists({ event: event._id });
+  if (hasIssued) {
+    throw new AppError(
+      "Cannot delete an event with issued tickets. Cancel the event instead.",
+      409,
+      "EVENT_HAS_TICKETS",
+    );
+  }
+
+  // Safe to cascade — no real attendees. Clean up the ticket types we created.
+  await Ticket.deleteMany({ event: event._id });
   await event.deleteOne();
 };
 
