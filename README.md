@@ -18,23 +18,19 @@ A full-stack event management and ticketing platform. Organizers create events a
 ```
 event-ticketing-system/
 ├── backend/                          # Node + Express + MongoDB API
-│   ├── app.js                        # Bootstraps Express, autoloads feature routes
-│   ├── server.js
-│   ├── config/                       # db.js, swagger.js, cloudinary.js
-│   ├── middleware/                   # auth, role, error handling
-│   ├── models/                       # Mongoose schemas
-│   ├── pkg/
-│   │   ├── utils/                    # AppError, catchAsync, jwt, paystack, response
-│   │   └── services/email.js         # SMTP/console transport
-│   └── features/                     # One folder per domain (PRD layout)
-│       ├── auth/                     # register/login/forgot/reset/change-password
-│       ├── users/                    # /me + admin user management
-│       ├── events/                   # event CRUD + publish/cancel
-│       ├── categories/               # category CRUD (admin writes)
-│       ├── tickets/                  # ticket TYPES + issued tickets + scan/validate
-│       ├── orders/                   # cart-style order + atomic inventory
-│       ├── payments/                 # Paystack init/verify (with dev mock)
-│       └── notifications/            # in-app + email dispatch
+│   ├── package.json
+│   ├── .env.example
+│   └── src/
+│       ├── app.js                    # Express bootstrap + route mounts
+│       ├── server.js
+│       ├── config/                   # db.js, swagger.js, cloudinary.js
+│       ├── controllers/              # thin: receive request → call service → respond
+│       ├── routes/                   # express routers; wires controllers + middleware
+│       ├── services/                 # business logic (auth, payments, issuance, email…)
+│       ├── models/                   # Mongoose schemas
+│       ├── middlewares/              # auth, role, error handling
+│       ├── validations/              # per-feature request shape validators
+│       └── utils/                    # AppError, catchAsync, jwt, paystack, response
 ├── frontend/                         # React + Vite + TypeScript + Tailwind + shadcn/ui
 │   └── src/
 │       ├── App.tsx, main.tsx
@@ -45,7 +41,7 @@ event-ticketing-system/
 └── README.md                         # this file
 ```
 
-The backend follows a **feature-based architecture**: each `features/<name>/` folder holds its own `route.js`, `controller.js`, `service.js`, and `validation.js`. Routes are thin, controllers are thin, business logic lives in services.
+The backend follows the by-type folder structure from the capstone brief. Controllers stay thin (receive request → call service → format response). Business logic lives in services. Each `<entity>` has a controller, route, service, and validation file matching by basename (e.g. `auth.controller.js` ↔ `auth.route.js` ↔ `auth.service.js` ↔ `auth.validation.js`).
 
 ## Tech stack
 
@@ -305,7 +301,7 @@ Each `IssuedTicket` has a unique 12-char hex `code`. The attendee sees QR codes 
 
 ## Project conventions
 
-- **Feature-based folders** — `features/<name>/{name}.route.js,controller.js,service.js,validation.js`. The app autoloader picks them up by scanning each folder for the first `*.route.js`.
+- **By-type folders under `src/`** — `controllers/`, `routes/`, `services/`, `models/`, `middlewares/`, `validations/`, `utils/`, `config/`. Same basename connects the pieces (e.g. `auth.controller.js` + `auth.route.js` + `auth.service.js` + `auth.validation.js`).
 - **Thin controllers** — controllers call the service, format the response, and that's it.
 - **`AppError`** + `catchAsync` — services throw `AppError(message, status, code)`; the error middleware turns it into the standard error response shape. Validators can attach an `errors[]` array of `{ field, message }`.
 - **Validation in dedicated files** — request-shape checks live in `*.validation.js` middleware, not in the controller.
