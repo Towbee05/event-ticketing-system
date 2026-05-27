@@ -1,4 +1,4 @@
-# Event Management & Ticketing System
+7# Event Management & Ticketing System
 
 A full-stack event management and ticketing platform. Organizers create events and ticket types, attendees discover events and book tickets with atomic inventory reservation, payments flow through Paystack (with a dev-mode mock), unique QR-encoded tickets are issued on payment success, and organizers validate them at the door.
 
@@ -318,6 +318,19 @@ Each `IssuedTicket` has a unique 12-char hex `code`. The attendee sees QR codes 
 - [ ] Set `CORS_ORIGIN` to the deployed frontend origin
 - [ ] `NODE_ENV=production` (loud failure on missing SMTP, hidden dev reset tokens)
 - [ ] Deploy `frontend/dist` to a static host (Vercel/Netlify/etc.) with `VITE_API_URL` pointing at the deployed backend
+
+##names of active group members
+1. Oluwole Feranmi Emmanuel
+2. ⁠Bamikole festus segun
+3. ⁠Otitolaye Olamilekan Olakunle
+4.Akenbor Nosakhare Jeffrey
+5. ⁠Jimoh Idris
+6. Akhibi Erica
+7. Olatise Oluwatobiloba
+8. ⁠Akintomiwa Azeez
+9. Adenola Ayomide
+10. Ugochukwu favour
+11. ⁠ifagbuyi Samuel
 
 ## Caveats / known limitations
 
